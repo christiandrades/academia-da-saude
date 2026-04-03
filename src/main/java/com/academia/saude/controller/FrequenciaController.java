@@ -6,6 +6,7 @@ import com.academia.saude.service.FrequenciaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,9 +44,10 @@ public class FrequenciaController {
      * GET /api/frequencias/{usuarioId}
      *
      * Retorna o histórico completo de frequências de um aluno.
-     * Acesso: qualquer usuário autenticado (ALUNO pode ver as próprias, SERVIDOR pode ver todas).
+     * ALUNO só pode ver o próprio histórico; SERVIDOR pode ver o de qualquer aluno.
      */
     @GetMapping("/{usuarioId}")
+    @PreAuthorize("authentication.principal.id.equals(#usuarioId) or hasRole('SERVIDOR')")
     public ResponseEntity<List<Frequencia>> listar(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(frequenciaService.listarPorUsuario(usuarioId));
     }

@@ -1,5 +1,6 @@
 package com.academia.saude.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,25 +51,32 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Remove o prefixo "Bearer " para obter somente o token
-        String token = authHeader.substring(7);
-        String email = jwtUtil.extractEmail(token);
+        try {
+            // Remove o prefixo "Bearer " para obter somente o token
+            String token = authHeader.substring(7);
+            String email = jwtUtil.extractEmail(token);
 
-        // Só autentica se o e-mail foi extraído e o usuário ainda não está autenticado na sessão atual
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            // Só autentica se o e-mail foi extraído e o usuário ainda não está autenticado
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            if (jwtUtil.isTokenValid(token, userDetails)) {
-                // Cria o objeto de autenticação com as permissões do usuário
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                if (jwtUtil.isTokenValid(token, userDetails)) {
+                    // Cria o objeto de autenticação com as permissões do usuário
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-                // Adiciona detalhes da requisição (IP, session id) ao contexto de autenticação
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    // Adiciona detalhes da requisição (IP, session id) ao contexto de autenticação
+                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Registra o usuário como autenticado no contexto de segurança do Spring
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                    // Registra o usuário como autenticado no contexto de segurança do Spring
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             }
+        } catch (JwtException e) {
+            // Token malformado, expirado ou com assinatura inválida:
+            // limpa o contexto e deixa a cadeia continuar sem autenticação.
+            // O Spring Security retornará 401 para rotas protegidas.
+            SecurityContextHolder.clearContext();
         }
 
         // Continua o processamento para o próximo filtro ou para o controller

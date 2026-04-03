@@ -1,5 +1,6 @@
 package com.academia.saude.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -23,8 +24,9 @@ public class Pontuacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Aluno que recebeu os pontos
-    // FetchType.LAZY: carrega o usuário apenas quando necessário
+    // @JsonIgnore previne referência circular na serialização JSON:
+    // Pontuacao → Usuario → List<Pontuacao> → Pontuacao → ...
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;

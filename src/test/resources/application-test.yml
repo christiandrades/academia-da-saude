@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    # Banco de dados em memória H2 exclusivo para testes — não afeta o banco de produção
+    url: jdbc:h2:mem:academia_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      # create-drop: recria as tabelas a cada execução de testes — garante estado limpo
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+jwt:
+  # Chave usada exclusivamente nos testes (nunca em produção)
+  secret: chave-de-teste-segura-minimo-256-bits-para-hmac-sha-academia-saude-tests
+  expiration: 86400000

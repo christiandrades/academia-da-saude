@@ -1,5 +1,6 @@
 package com.academia.saude.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -26,8 +27,9 @@ public class Frequencia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relacionamento com o usuário dono deste registro
-    // FetchType.LAZY: o usuário só é carregado do banco quando acessado explicitamente
+    // @JsonIgnore previne referência circular na serialização JSON:
+    // Frequencia → Usuario → List<Frequencia> → Frequencia → ...
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;

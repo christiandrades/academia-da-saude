@@ -3,3 +3,21 @@ node_modules/
 .wrangler/
 .dev.vars
 worker-configuration.d.ts
+
+# Build Maven
+target/
+
+# Variáveis de ambiente
+.env
+*.env
+
+# Logs
+*.log
+logs/
+
+# Relatório privado de segurança — não deve ser versionado
+SECURITY.md
+
+# Configuração de ambiente local
+application-prod.yml
+application-local.yml
