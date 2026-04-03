@@ -1,0 +1,69 @@
+
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  mocha_user_id TEXT UNIQUE NOT NULL,
+  nome TEXT NOT NULL,
+  cpf TEXT UNIQUE,
+  email TEXT UNIQUE NOT NULL,
+  role TEXT NOT NULL DEFAULT 'student',
+  turma_id INTEGER,
+  foto_url TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE turmas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nome TEXT NOT NULL,
+  horario TEXT NOT NULL,
+  instrutor TEXT NOT NULL,
+  local TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE aulas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  turma_id INTEGER NOT NULL,
+  data DATE NOT NULL,
+  tema_opcional TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE frequencias (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  aula_id INTEGER NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('PRESENTE', 'ATRASO', 'FALTA')),
+  fonte TEXT NOT NULL DEFAULT 'MANUAL' CHECK (fonte IN ('GOOGLE_FORMS', 'MANUAL')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE badges (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT UNIQUE NOT NULL,
+  titulo TEXT NOT NULL,
+  descricao TEXT NOT NULL,
+  cor TEXT NOT NULL,
+  icone TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user_badges (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  badge_id INTEGER NOT NULL,
+  data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_users_mocha_user_id ON users(mocha_user_id);
+CREATE INDEX idx_users_cpf ON users(cpf);
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_aulas_turma_data ON aulas(turma_id, data);
+CREATE INDEX idx_frequencias_user_aula ON frequencias(user_id, aula_id);
+CREATE INDEX idx_user_badges_user_id ON user_badges(user_id);

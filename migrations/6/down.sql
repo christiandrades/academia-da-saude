@@ -1,0 +1,4 @@
+
+DELETE FROM frequencias WHERE user_id = 1;
+DELETE FROM aulas WHERE id BETWEEN 1 AND 11;
+DELETE FROM turmas WHERE id BETWEEN 1 AND 5;
