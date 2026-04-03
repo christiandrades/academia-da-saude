@@ -19,9 +19,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuração central de segurança da aplicação.
+ *
+ * Define:
+ * - Quais rotas são públicas e quais exigem autenticação
+ * - Quais perfis (roles) têm acesso a cada grupo de endpoints
+ * - Como o Spring Security autentica os usuários (via banco de dados)
+ * - Que a API é stateless (sem sessão no servidor — usa JWT)
+ */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity // Habilita @PreAuthorize e @Secured nos controllers
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
@@ -32,28 +41,54 @@ public class SecurityConfig {
         this.usuarioRepository = usuarioRepository;
     }
 
+    /**
+     * Define as regras de autorização por rota (RBAC).
+     *
+     * Ordem das regras importa: a primeira que casar com a rota é aplicada.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                // CSRF desabilitado: APIs REST stateless não precisam de proteção CSRF
                 .csrf(csrf -> csrf.disable())
+
+                // Sem sessão no servidor — cada requisição é autenticada via token JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(auth -> auth
+                        // Rota de login é pública — qualquer um pode acessar
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // Dashboard de faltosos: restrito a SERVIDOR
                         .requestMatchers("/api/dashboard/**").hasRole("SERVIDOR")
+
+                        // Registro de presença (POST /frequencias): restrito a SERVIDOR
                         .requestMatchers("/api/frequencias").hasRole("SERVIDOR")
+
+                        // Qualquer outra rota exige autenticação (token válido)
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
+
+                // Insere o filtro JWT antes do filtro padrão de autenticação por formulário
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
+    /**
+     * Ensina o Spring Security a carregar um usuário pelo e-mail.
+     * Usado durante a validação do token JWT no JwtFilter.
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
     }
 
+    /**
+     * Provider que conecta o UserDetailsService ao PasswordEncoder.
+     * Responsável por comparar a senha digitada (texto puro) com o hash BCrypt salvo no banco.
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -62,11 +97,16 @@ public class SecurityConfig {
         return provider;
     }
 
+    // Expõe o AuthenticationManager como bean para ser injetado no AuthService
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * BCrypt é o algoritmo de hash de senhas recomendado pelo Spring Security.
+     * Adiciona salt automático, tornando cada hash único mesmo para senhas iguais.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
