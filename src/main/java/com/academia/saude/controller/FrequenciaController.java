@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controller responsável pelos endpoints de frequência.
+ *
+ * O registro de presença é restrito a SERVIDOR (configurado no SecurityConfig).
+ * A consulta do histórico por usuário é acessível a qualquer usuário autenticado.
+ */
 @RestController
 @RequestMapping("/api/frequencias")
 public class FrequenciaController {
@@ -20,12 +26,25 @@ public class FrequenciaController {
         this.frequenciaService = frequenciaService;
     }
 
+    /**
+     * POST /api/frequencias
+     *
+     * Registra uma presença ou ausência para o aluno informado.
+     * Retorna HTTP 201 (Created) com o registro salvo.
+     * Acesso: somente SERVIDOR.
+     */
     @PostMapping
     public ResponseEntity<Frequencia> registrar(@Valid @RequestBody FrequenciaRequest request) {
         Frequencia frequencia = frequenciaService.registrar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(frequencia);
     }
 
+    /**
+     * GET /api/frequencias/{usuarioId}
+     *
+     * Retorna o histórico completo de frequências de um aluno.
+     * Acesso: qualquer usuário autenticado (ALUNO pode ver as próprias, SERVIDOR pode ver todas).
+     */
     @GetMapping("/{usuarioId}")
     public ResponseEntity<List<Frequencia>> listar(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(frequenciaService.listarPorUsuario(usuarioId));

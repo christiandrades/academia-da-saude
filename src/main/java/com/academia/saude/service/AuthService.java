@@ -9,6 +9,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+/**
+ * Serviço responsável pela autenticação do usuário.
+ *
+ * Delega a verificação de credenciais ao Spring Security (AuthenticationManager),
+ * que compara o hash BCrypt da senha salva no banco com a senha informada no login.
+ */
 @Service
 public class AuthService {
 
@@ -20,12 +26,24 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
     }
 
+    /**
+     * Autentica o usuário e retorna um token JWT.
+     *
+     * O AuthenticationManager lança BadCredentialsException automaticamente
+     * se o e-mail não existir ou a senha estiver errada — não é necessário tratar manualmente.
+     */
     public LoginResponse login(LoginRequest request) {
+        // Autentica as credenciais contra o banco de dados
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.senha())
         );
+
+        // getPrincipal() retorna o objeto Usuario autenticado
         Usuario usuario = (Usuario) auth.getPrincipal();
+
+        // Gera o token JWT que será usado nas próximas requisições
         String token = jwtUtil.generateToken(usuario);
+
         return new LoginResponse(token, usuario.getRole().name());
     }
 }

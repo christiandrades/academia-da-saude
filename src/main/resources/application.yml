@@ -6,16 +6,20 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
+      # update: o Hibernate cria/atualiza as tabelas automaticamente ao subir a aplicação
+      # Em produção, trocar para "validate" e usar migrations (Flyway/Liquibase)
       ddl-auto: update
-    show-sql: true
+    show-sql: true       # Exibe as queries SQL geradas no console (útil para debug)
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+        format_sql: true # Formata o SQL no console para facilitar leitura
 
 jwt:
+  # Chave secreta usada para assinar os tokens JWT
+  # Em produção, definir via variável de ambiente JWT_SECRET (nunca commitar a chave real)
   secret: ${JWT_SECRET:academia-saude-secret-key-minimo-256-bits-change-in-production}
-  expiration: 86400000
+  expiration: 86400000  # Tempo de expiração do token: 86400000ms = 24 horas
 
 server:
   port: 8080
