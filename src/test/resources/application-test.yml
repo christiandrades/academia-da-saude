@@ -18,3 +18,6 @@ jwt:
   # Chave usada exclusivamente nos testes (nunca em produção)
   secret: chave-de-teste-segura-minimo-256-bits-para-hmac-sha-academia-saude-tests
   expiration: 86400000
+
+cors:
+  allowed-origins: http://localhost:4200
