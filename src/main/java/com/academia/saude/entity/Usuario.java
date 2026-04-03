@@ -1,5 +1,6 @@
 package com.academia.saude.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -37,7 +38,8 @@ public class Usuario implements UserDetails {
     @Column(unique = true)
     private String email;
 
-    // Senha armazenada como hash BCrypt — nunca em texto puro
+    // @JsonIgnore impede que o hash BCrypt seja exposto em qualquer resposta JSON da API
+    @JsonIgnore
     @NotBlank
     private String senha;
 
@@ -47,12 +49,13 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    // Lista de presenças registradas para este usuário
-    // cascade = ALL: ao excluir o usuário, suas frequências também são excluídas
+    // @JsonIgnore nas coleções previne referência circular na serialização JSON
+    // (Usuario → List<Frequencia> → Usuario → ...) e evita exposição de dados desnecessários
+    @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<Frequencia> frequencias;
 
-    // Lista de registros de pontuação vinculados a este usuário
+    @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<Pontuacao> pontuacoes;
 
@@ -76,7 +79,8 @@ public class Usuario implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
-    // O Spring Security usa getPassword() para comparar com a senha informada no login
+    // @JsonIgnore garante que a senha nunca seja serializada, nem via este método herdado de UserDetails
+    @JsonIgnore
     @Override
     public String getPassword() {
         return senha;

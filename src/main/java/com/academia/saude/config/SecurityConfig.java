@@ -68,6 +68,14 @@ public class SecurityConfig {
                         // Qualquer outra rota exige autenticação (token válido)
                         .anyRequest().authenticated()
                 )
+
+                // Retorna 401 para requisições sem autenticação válida (em vez do padrão 403)
+                // Retorna 403 para usuários autenticados sem permissão suficiente para a rota
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, e) -> res.sendError(401, "Não autenticado"))
+                        .accessDeniedHandler((req, res, e) -> res.sendError(403, "Acesso negado"))
+                )
+
                 .authenticationProvider(authenticationProvider())
 
                 // Insere o filtro JWT antes do filtro padrão de autenticação por formulário
@@ -88,6 +96,9 @@ public class SecurityConfig {
     /**
      * Provider que conecta o UserDetailsService ao PasswordEncoder.
      * Responsável por comparar a senha digitada (texto puro) com o hash BCrypt salvo no banco.
+     *
+     * hideUserNotFoundExceptions = true (padrão): faz com que "usuário não encontrado"
+     * e "senha errada" retornem a mesma mensagem genérica, evitando enumeração de usuários.
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {

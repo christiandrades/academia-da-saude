@@ -6,6 +6,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?style=flat-square&logo=postgresql)
 ![Maven](https://img.shields.io/badge/Maven-3.8+-red?style=flat-square&logo=apachemaven)
 ![Status](https://img.shields.io/badge/Status-MVP-yellow?style=flat-square)
+![Testes](https://img.shields.io/badge/Testes_de_Segurança-31_casos-success?style=flat-square)
 
 ---
 
@@ -239,6 +240,34 @@ Parâmetro `dias` é opcional (padrão: 30).
   { "id": 15, "nome": "João Santos", "email": "joao@email.com",   "role": "ALUNO" }
 ]
 ```
+
+---
+
+## Testes de Segurança
+
+A API é coberta por **31 testes de segurança automatizados** que verificam o comportamento do sistema contra as principais ameaças do [OWASP Top 10](https://owasp.org/www-project-top-ten/). Os testes rodam com banco de dados H2 em memória — sem dependência de PostgreSQL.
+
+```bash
+mvn test
+```
+
+### Categorias de Teste
+
+| Classe | Casos | Cobertura |
+|---|---|---|
+| `AuthenticationSecurityTest` | 8 | SQL Injection, XSS, campos inválidos, enumeração de usuários |
+| `JwtSecurityTest` | 8 | Token ausente, malformado, adulterado, expirado, forjado com chave errada |
+| `AuthorizationSecurityTest` | 7 | RBAC por perfil, controle de acesso por proprietário dos dados |
+| `InputValidationSecurityTest` | 8 | Campos nulos, JSON malformado, type confusion, strings extremas, range de parâmetros |
+
+### OWASP Top 10 — Cobertura
+
+| ID | Categoria | Status |
+|---|---|---|
+| A01 | Broken Access Control | Coberto — RBAC e controle por proprietário dos dados |
+| A03 | Injection | Coberto — SQL Injection e XSS no endpoint de autenticação |
+| A07 | Identification and Authentication Failures | Coberto — força bruta, enumeração, JWT attacks |
+| A08 | Software and Data Integrity Failures | Coberto — JWT tampering e token forgery |
 
 ---
 

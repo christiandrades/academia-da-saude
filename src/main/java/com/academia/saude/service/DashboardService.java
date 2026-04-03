@@ -36,6 +36,11 @@ public class DashboardService {
      * 2. Carrega os usuários completos apenas com os IDs encontrados
      */
     public List<Usuario> listarFaltosos(int diasRetroativos) {
+        // Valida o range do parâmetro para evitar queries abusivas ou com lógica invertida
+        if (diasRetroativos < 1 || diasRetroativos > 365) {
+            throw new IllegalArgumentException("O parâmetro 'dias' deve ser entre 1 e 365");
+        }
+
         // Calcula a data de corte do período analisado
         LocalDateTime desde = LocalDateTime.now().minusDays(diasRetroativos);
 

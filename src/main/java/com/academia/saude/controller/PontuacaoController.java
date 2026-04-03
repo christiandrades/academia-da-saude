@@ -3,6 +3,7 @@ package com.academia.saude.controller;
 import com.academia.saude.entity.Pontuacao;
 import com.academia.saude.service.PontuacaoService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,7 +34,9 @@ public class PontuacaoController {
      *   "historico": [ { "pontos": 10, "motivo": "Presença registrada", ... }, ... ]
      * }
      */
+    // ALUNO só pode consultar os próprios pontos; SERVIDOR pode consultar qualquer aluno
     @GetMapping("/{usuarioId}")
+    @PreAuthorize("authentication.principal.id.equals(#usuarioId) or hasRole('SERVIDOR')")
     public ResponseEntity<Map<String, Object>> consultar(@PathVariable Long usuarioId) {
         Integer total = pontuacaoService.totalPontos(usuarioId);
         List<Pontuacao> historico = pontuacaoService.historico(usuarioId);
