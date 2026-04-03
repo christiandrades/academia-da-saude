@@ -23,3 +23,9 @@ jwt:
 
 server:
   port: 8080
+
+cors:
+  # Origens permitidas para requisições do front-end Angular.
+  # Em produção, substituir pelo domínio real via variável de ambiente CORS_ORIGINS.
+  # Para múltiplas origens, separar por vírgula: http://app1.com,http://app2.com
+  allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
