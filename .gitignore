@@ -21,3 +21,4 @@ SECURITY.md
 # Configuração de ambiente local
 application-prod.yml
 application-local.yml
+.env
