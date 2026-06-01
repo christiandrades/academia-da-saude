@@ -22,3 +22,5 @@ SECURITY.md
 application-prod.yml
 application-local.yml
 .env
+.idea/
+.vs/
